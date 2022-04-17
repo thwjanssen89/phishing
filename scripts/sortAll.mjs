@@ -14,14 +14,25 @@ function sanitizeUrl (url) {
 }
 
 function sortSection (list) {
-  return list
+  const unsorted = list
     .map((entry) => sanitizeUrl(entry))
-    .reduce((filtered, entry) => {
-      !filtered.includes(entry) &&
-        filtered.push(entry);
+    .reduce((unsorted, entry) => {
+      !unsorted.includes(entry) &&
+        unsorted.push(entry);
 
-      return filtered;
-    }, [])
+      return unsorted;
+    }, []);
+
+  return unsorted
+    .filter((entry, index) => {
+      for (let i = 0; i < unsorted.length; i++) {
+        if (i !== index && entry.endsWith(`.${unsorted[i]}`)) {
+          return false;
+        }
+      }
+
+      return true;
+    })
     .sort((a, b) => a.localeCompare(b));
 }
 
@@ -48,7 +59,14 @@ function addSites ({ allow, deny }, values) {
   return Object
     .keys(values)
     .reduce((filtered, url) => {
-      url.includes('.') && !url.includes(' ') && !url.includes('/') && !allow.includes(url) && !filtered.includes(url) && !KNOWN_URLS.includes(url) &&
+      (
+        url.includes('.') &&
+        !url.includes(' ') &&
+        !url.includes('/') &&
+        !allow.includes(url) &&
+        !filtered.includes(url) &&
+        !KNOWN_URLS.includes(url)
+      ) &&
         filtered.push(url);
 
       return filtered;
